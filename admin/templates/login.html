@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Вход — Админ-панель</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f3f4f6; margin:0; padding:0; }
+    .container { max-width: 420px; margin: 80px auto; padding: 40px 32px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    h1 { text-align: center; margin-bottom: 32px; font-size: 28px; color: #1f2937; }
+    label { display: block; margin-bottom: 8px; font-weight: 500; color: #374151; }
+    input { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+    input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    button { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #4f46e5; }
+    .error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="container">
+
+    <h1>Админ-панель</h1>
+
+    <div v-if="error" class="error">
+      {{ error }}
+    </div>
+
+    <form @submit.prevent="login" style="display: flex; flex-direction: column; gap: 20px;">
+      <div>
+        <label>Логин</label>
+        <input v-model="form.username" type="text" required autocomplete="username">
+      </div>
+      <div>
+        <label>Пароль</label>
+        <input v-model="form.password" type="password" required autocomplete="current-password">
+      </div>
+      <button type="submit">Войти</button>
+    </form>
+
+  </div>
+
+  <script>
+    const { createApp, ref } = Vue;
+
+    createApp({
+      setup() {
+        const form = ref({ username: '', password: '' });
+        const error = ref(null);
+
+        const login = async () => {
+          try {
+            // Замените на ваш реальный эндпоинт
+            const res = await axios.post('/api/v1/admin/login', form.value);
+            localStorage.setItem('token', res.data.token || 'fake-token');
+            window.location.href = '/admin/dashboard.html';
+          } catch (err) {
+            error.value = err.response?.data?.detail || 'Ошибка авторизации';
+          }
+        };
+
+        return { form, error, login };
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+</html>

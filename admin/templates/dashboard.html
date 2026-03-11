@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Дашборд — Админ</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { margin:0; font-family: system-ui, sans-serif; background:#f3f4f6; }
+    .layout { display: flex; height: 100vh; }
+    .sidebar { width: 240px; background: #111827; color: white; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 24px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #1f2937; }
+    .nav { flex: 1; padding: 16px; }
+    .nav a { display: block; padding: 12px 16px; color: white; text-decoration: none; border-radius: 6px; margin-bottom: 4px; }
+    .nav a:hover, .nav a.active { background: #1f2937; }
+    .logout { padding: 16px; }
+    .logout button { width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .logout button:hover { background: #b91c1c; }
+    .main { flex: 1; padding: 32px; overflow: auto; }
+    h1 { margin: 0 0 32px 0; font-size: 28px; color: #111827; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+    .card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card h3 { margin: 0 0 12px 0; color: #4b5563; font-size: 16px; font-weight: 500; }
+    .card p { margin: 0; font-size: 36px; font-weight: 700; color: #111827; }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">Admin Panel</div>
+      <nav class="nav">
+        <a href="dashboard.html" class="active">Дашборд</a>
+        <a href="hotels/list.html">Отели</a>
+        <a href="rooms/list.html">Номера</a>
+      </nav>
+      <div class="logout">
+        <button @click="logout">Выйти</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1>Дашборд</h1>
+
+      <div class="stats">
+        <div class="card">
+          <h3>Отелей всего</h3>
+          <p>{{ stats.hotels }}</p>
+        </div>
+        <div class="card">
+          <h3>Номеров всего</h3>
+          <p>{{ stats.rooms }}</p>
+        </div>
+        <div class="card">
+          <h3>Бронирований сегодня</h3>
+          <p>{{ stats.bookings }}</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const stats = ref({ hotels: 0, rooms: 0, bookings: 0 });
+
+        onMounted(async () => {
+          try {
+            const [hotelsRes, roomsRes] = await Promise.all([
+              axios.get('/api/v1/hotels'),
+              axios.get('/api/v1/rooms')  // если такого эндпоинта нет — закомментируйте
+            ]);
+            stats.value.hotels = hotelsRes.data.length || 0;
+            stats.value.rooms  = roomsRes.data.length  || 0;
+            stats.value.bookings = 28; // заглушка — замените на реальный запрос
+          } catch (e) {
+            console.error(e);
+          }
+        });
+
+        const logout = () => {
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        };
+
+        return { stats, logout };
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+</html>

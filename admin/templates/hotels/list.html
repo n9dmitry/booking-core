@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Отели — список</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body { margin:0; font-family: system-ui, sans-serif; background:#f3f4f6; }
+    .layout { display: flex; height: 100vh; }
+    .sidebar { width: 240px; background: #111827; color: white; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 24px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #1f2937; }
+    .nav { flex: 1; padding: 16px; }
+    .nav a { display: block; padding: 12px 16px; color: white; text-decoration: none; border-radius: 6px; margin-bottom: 4px; }
+    .nav a:hover, .nav a.active { background: #1f2937; }
+    .main { flex: 1; padding: 32px; overflow: auto; }
+    h1 { margin: 0 0 24px 0; font-size: 26px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .btn-add { padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; }
+    .btn-add:hover { background: #4f46e5; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; color: #4b5563; text-transform: uppercase; font-size: 0.85rem; }
+    tr:hover { background: #f8f9fa; }
+    .actions a, .actions button { margin-right: 12px; color: #6366f1; background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+    .actions button { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div id="app" class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">Admin Panel</div>
+      <nav class="nav">
+        <a href="../dashboard.html">Дашборд</a>
+        <a href="list.html" class="active">Отели</a>
+        <a href="../rooms/list.html">Номера</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <h1>Отели</h1>
+        <a href="create.html" class="btn-add">+ Добавить отель</a>
+      </div>
+
+      <div v-if="loading" style="text-align:center; padding:60px; color:#6b7280;">
+        <i class="fas fa-spinner fa-spin" style="font-size:2.5rem;"></i><br><br>Загрузка...
+      </div>
+
+      <table v-else>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Домен</th>
+            <th>Адрес</th>
+            <th style="text-align:right;">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="hotel in hotels" :key="hotel.id">
+            <td>{{ hotel.id }}</td>
+            <td>{{ hotel.name }}</td>
+            <td>{{ hotel.domain || '—' }}</td>
+            <td>{{ hotel.address || '—' }}</td>
+            <td class="actions" style="text-align:right;">
+              <a :href="`edit.html?id=${hotel.id}`"><i class="fas fa-edit"></i></a>
+              <button @click="deleteHotel(hotel.id)"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          <tr v-if="hotels.length === 0">
+            <td colspan="5" style="text-align:center; padding:60px; color:#9ca3af;">
+              Отелей пока нет
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+  </div>
+
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const hotels = ref([]);
+        const loading = ref(true);
+
+        const loadHotels = async () => {
+          try {
+            const res = await axios.get('/api/v1/hotels');
+            hotels.value = res.data;
+          } catch (err) {
+            console.error(err);
+            alert('Не удалось загрузить список отелей');
+          } finally {
+            loading.value = false;
+          }
+        };
+
+        const deleteHotel = async (id) => {
+          if (!confirm('Удалить отель?')) return;
+          try {
+            await axios.delete(`/api/v1/hotels/${id}`);
+            hotels.value = hotels.value.filter(h => h.id !== id);
+          } catch (err) {
+            alert('Ошибка при удалении');
+          }
+        };
+
+        onMounted(loadHotels);
+
+        return { hotels, loading, deleteHotel };
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+</html>
