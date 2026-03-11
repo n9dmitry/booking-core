@@ -19,6 +19,7 @@ booking-core/
 │   ├── hotels.py                 # Бизнес-логика домена hotels
 │   └── routes.py                 # API эндпоинты: /hotels, /hotels/{id}/rooms
 │
+
 ├── bookings/                      # Домен: Бронирования
 │   ├── models.py                  # Модель Booking
 │   ├── schemas.py                 # Схемы для создания и просмотра броней
