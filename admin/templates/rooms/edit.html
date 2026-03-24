@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{% if room %}Редактировать номер {{ room.number }}{% else %}Новый номер{% endif %}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">{% if room %}Номер {{ room.number }}{% else %}Новый номер{% endif %}</h1>
+  <a href="/admin/rooms" class="btn btn-secondary">← Назад</a>
+</div>
+
+{% if error %}
+<div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<div class="card form-card">
+  {% if room %}
+  <form method="post" action="/admin/rooms/{{ room.id }}/edit">
+  {% else %}
+  <form method="post" action="/admin/rooms/create">
+  {% endif %}
+    <div class="form-row">
+      <div class="form-group">
+        <label>Отель <span class="req">*</span></label>
+        <select name="hotel_id" required>
+          {% for h in hotels %}
+          <option value="{{ h.id }}"
+            {% if room and room.hotel_id == h.id %}selected
+            {% elif not room and default_hotel_id == h.id %}selected
+            {% endif %}>{{ h.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Номер комнаты <span class="req">*</span></label>
+        <input type="text" name="number" value="{{ room.number if room else '' }}" placeholder="101" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Название <span class="req">*</span></label>
+      <input type="text" name="name" value="{{ room.name if room else '' }}" placeholder="Стандарт «Морской»" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Базовая цена (₽/ночь) <span class="req">*</span></label>
+        <input type="number" name="base_price" value="{{ room.base_price if room else '' }}" min="0" step="100" required>
+      </div>
+      <div class="form-group">
+        <label>Площадь (м²)</label>
+        <input type="number" name="area_sqm" value="{{ room.area_sqm if room else '' }}" step="0.5">
+      </div>
+      <div class="form-group">
+        <label>Этаж</label>
+        <input type="number" name="floor" value="{{ room.floor if room else '' }}" min="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Взрослых (макс.)</label>
+        <input type="number" name="capacity_adults" value="{{ room.capacity_adults if room else 2 }}" min="1">
+      </div>
+      <div class="form-group">
+        <label>Детей (макс.)</label>
+        <input type="number" name="capacity_children" value="{{ room.capacity_children if room else 0 }}" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание</label>
+      <textarea name="description" rows="3">{{ room.description if room else '' }}</textarea>
+    </div>
+    {% if all_rules %}
+    <div class="form-group">
+      <label>Правила номера</label>
+      <div class="rules-checkboxes">
+        {% for rule in all_rules %}
+        <label class="checkbox-label">
+          <input type="checkbox" name="rule_ids" value="{{ rule.id }}">
+          <span class="tag">{{ rule.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <div class="form-group checkbox-group">
+      <label class="checkbox-label">
+        <input type="checkbox" name="is_active" {% if not room or room.is_active %}checked{% endif %}>
+        Номер активен
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{% if room %}Сохранить{% else %}Создать номер{% endif %}</button>
+      <a href="/admin/rooms" class="btn btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

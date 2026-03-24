@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Бронь {{ booking.id[:8] | upper }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Бронь #{{ booking.id[:8] | upper }}</h1>
+  <a href="/admin/bookings" class="btn btn-secondary">← Назад</a>
+</div>
+
+<div class="detail-grid">
+  <!-- Left column -->
+  <div>
+    <div class="card">
+      <div class="card-title">Статус</div>
+      <span class="badge badge-lg badge-{{ booking.status }}">
+        {{ status_labels.get(booking.status, booking.status) }}
+      </span>
+      <form method="post" action="/admin/bookings/{{ booking.id }}/status" style="margin-top:14px">
+        <label style="font-size:0.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Изменить статус</label>
+        <select name="new_status" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:0.87rem;margin-bottom:8px">
+          {% for s in statuses %}
+          <option value="{{ s }}" {% if s == booking.status %}selected{% endif %}>
+            {{ status_labels.get(s, s) }}
+          </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;justify-content:center">Применить</button>
+      </form>
+      {% if booking.bitrix_deal_url %}
+      <a href="{{ booking.bitrix_deal_url }}" target="_blank" class="btn btn-secondary btn-sm"
+         style="margin-top:10px;display:block;text-align:center">
+        Открыть в Битрикс24 →
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Проживание</div>
+      <div class="detail-row"><span>Отель</span><strong>{{ booking.hotel_id }}</strong></div>
+      <div class="detail-row"><span>Номер</span><strong>#{{ booking.room_id }}</strong></div>
+      <div class="detail-row"><span>Заезд</span><strong>{{ booking.check_in.strftime('%d.%m.%Y') if booking.check_in else '—' }}</strong></div>
+      <div class="detail-row"><span>Выезд</span><strong>{{ booking.check_out.strftime('%d.%m.%Y') if booking.check_out else '—' }}</strong></div>
+      <div class="detail-row">
+        <span>Гостей</span>
+        <strong>{{ booking.adults }} взр.{% if booking.children %}, {{ booking.children }} дет.{% endif %}</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Оплата</div>
+      <div class="detail-row"><span>Проживание</span><strong>{{ "{:,.0f}".format(booking.room_total) }} ₽</strong></div>
+      <div class="detail-row"><span>Услуги</span><strong>{{ "{:,.0f}".format(booking.services_total) }} ₽</strong></div>
+      <div class="detail-row total-row"><span>Итого</span><strong>{{ "{:,.0f}".format(booking.total_amount) }} ₽</strong></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">Действия</div>
+      <form method="post" action="/admin/bookings/{{ booking.id }}/delete"
+            onsubmit="return confirm('Удалить бронь #{{ booking.id[:8] | upper }}? Это действие нельзя отменить.')">
+        <button type="submit" class="btn btn-danger btn-sm" style="width:100%;justify-content:center">🗑️ Удалить бронь</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div>
+    <div class="card">
+      <div class="card-title">Клиент в Битрикс24</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">
+        ПД клиента хранятся только в Битрикс24. Нажмите «Открыть контакт» для просмотра.
+      </div>
+      {% if booking.bitrix_contact_id %}
+      <div class="detail-row">
+        <span>ID контакта</span>
+        <strong>
+          <a href="https://{{ bitrix_domain }}/crm/contact/details/{{ booking.bitrix_contact_id }}/"
+             target="_blank" style="color:var(--accent)">
+            #{{ booking.bitrix_contact_id }} ↗
+          </a>
+        </strong>
+      </div>
+      {% endif %}
+      {% if booking.bitrix_deal_id %}
+      <div class="detail-row">
+        <span>ID сделки</span>
+        <strong>
+          <a href="{{ booking.bitrix_deal_url }}" target="_blank" style="color:var(--accent)">
+            #{{ booking.bitrix_deal_id }} ↗
+          </a>
+        </strong>
+      </div>
+      {% else %}
+      <div style="color:var(--muted);font-size:0.82rem;margin-top:8px">⚠️ Сделка в Битрикс не создана</div>
+      {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="card-title">История статусов</div>
+      <div class="timeline">
+        {% for h in booking.history | sort(attribute='created_at') %}
+        <div class="timeline-item">
+          <div class="timeline-dot badge-{{ h.new_status }}"></div>
+          <div class="timeline-body">
+            <div class="timeline-status">{{ status_labels.get(h.new_status, h.new_status) }}</div>
+            {% if h.comment %}<div class="timeline-comment">{{ h.comment }}</div>{% endif %}
+            <div class="timeline-time">{{ h.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted">История пуста</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Пользователи{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Пользователи</h1>
+</div>
+
+{% if error %}
+<div class="alert alert-error" style="max-width:700px">⚠️ {{ error }}</div>
+{% endif %}
+{% if success %}
+<div class="alert alert-success" style="max-width:700px">✅ {{ success }}</div>
+{% endif %}
+
+<!-- Role legend -->
+<div class="roles-legend">
+  <div class="role-card role-superuser">
+    <div class="role-name">Суперпользователь</div>
+    <div class="role-desc">Полный доступ + управление пользователями</div>
+  </div>
+  <div class="role-card role-admin">
+    <div class="role-name">Администратор</div>
+    <div class="role-desc">Отели, номера, брони, API-токены</div>
+  </div>
+  <div class="role-card role-manager">
+    <div class="role-name">Менеджер</div>
+    <div class="role-desc">Создание и редактирование броней</div>
+  </div>
+  <div class="role-card role-viewer">
+    <div class="role-name">Просмотр</div>
+    <div class="role-desc">Только чтение данных</div>
+  </div>
+</div>
+
+<div class="users-layout">
+  <!-- Create form -->
+  <div class="card" style="align-self:start">
+    <div class="card-title">Новый пользователь</div>
+    <form method="post" action="/admin/users/create">
+      <div class="form-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" name="email" placeholder="manager@hotel.ru" required>
+      </div>
+      <div class="form-group">
+        <label>Имя</label>
+        <input type="text" name="full_name" placeholder="Иванов Иван">
+      </div>
+      <div class="form-group">
+        <label>Пароль <span class="req">*</span></label>
+        <input type="password" name="password" placeholder="••••••••" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>Роль <span class="req">*</span></label>
+        <select name="role" required>
+          {% for role in roles %}
+          <option value="{{ role.value }}">{{ role_labels[role] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">
+        + Создать пользователя
+      </button>
+    </form>
+  </div>
+
+  <!-- Users table -->
+  <div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Пользователь</th><th>Роль</th><th>Статус</th><th>Последний вход</th><th>Создан</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+        <tr {% if u.id == current_user_id %}style="background:rgba(124,92,252,0.06)"{% endif %}>
+          <td>
+            <div style="font-weight:600;color:#fff">{{ u.full_name or u.email }}</div>
+            {% if u.full_name %}
+            <div style="font-size:0.77rem;color:var(--text-dim)">{{ u.email }}</div>
+            {% endif %}
+            {% if u.id == current_user_id %}
+            <span style="font-size:0.68rem;background:rgba(124,92,252,0.2);color:var(--accent);padding:1px 6px;border-radius:10px;border:1px solid rgba(124,92,252,0.3)">вы</span>
+            {% endif %}
+          </td>
+          <td><span class="role-badge role-{{ u.role }}">{{ role_labels.get(u.role, u.role) }}</span></td>
+          <td>
+            {% if u.is_active %}
+              <span class="badge badge-active">● Активен</span>
+            {% else %}
+              <span class="badge badge-inactive">○ Выключен</span>
+            {% endif %}
+          </td>
+          <td style="font-size:0.8rem;color:var(--text-dim)">
+            {{ u.last_login_at.strftime('%d.%m.%Y %H:%M') if u.last_login_at else '—' }}
+          </td>
+          <td style="font-size:0.8rem;color:var(--text-dim)">{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+          <td>
+            <button class="btn btn-secondary btn-xs"
+                    onclick="openEdit({{ u.id }}, '{{ u.email }}', '{{ u.full_name or '' }}', '{{ u.role }}', {{ 'true' if u.is_active else 'false' }})">
+              ✏️
+            </button>
+            {% if u.id != current_user_id %}
+            <form method="post" action="/admin/users/{{ u.id }}/delete" style="display:inline"
+                  onsubmit="return confirm('Удалить пользователя {{ u.email }}?')">
+              <button class="btn btn-danger btn-xs">🗑️</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty">Пользователей нет</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div id="edit-modal" class="modal-backdrop" style="display:none">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="edit-modal-title">Редактировать</span>
+      <button class="modal-close-btn" onclick="closeEdit()">×</button>
+    </div>
+    <div class="modal-body">
+      <form method="post" id="edit-form">
+        <div class="form-group">
+          <label>Имя</label>
+          <input type="text" name="full_name" id="edit-full-name" placeholder="Иванов Иван">
+        </div>
+        <div class="form-group">
+          <label>Роль</label>
+          <select name="role" id="edit-role">
+            {% for role in roles %}
+            <option value="{{ role.value }}">{{ role_labels[role] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="is_active" id="edit-active">
+            Активен
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Новый пароль <span style="color:var(--text-dim);font-weight:400">(оставьте пустым чтобы не менять)</span></label>
+          <input type="password" name="new_password" placeholder="••••••••" minlength="6">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeEdit()">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/admin/static/css/users.css">
+<script src="/admin/static/js/users.js"></script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Бронирования{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Бронирования</h1>
+  <div style="display:flex;gap:10px;align-items:center">
+    {% if pending_count > 0 %}
+    <span class="badge badge-waiting_payment badge-lg">⏳ {{ pending_count }} ожидают оплаты</span>
+    {% endif %}
+    <a href="/admin/bookings/create" class="btn btn-primary">+ Создать бронь</a>
+  </div>
+</div>
+
+<div class="filter-pills">
+  <a href="/admin/bookings" class="pill {% if not selected_status %}active{% endif %}">Все</a>
+  <a href="/admin/bookings?status=waiting_payment" class="pill pill-warning {% if selected_status == 'waiting_payment' %}active{% endif %}">⏳ Ожидают оплаты</a>
+  <a href="/admin/bookings?status=paid"            class="pill pill-success {% if selected_status == 'paid' %}active{% endif %}">✅ Оплачено</a>
+  <a href="/admin/bookings?status=cancelled"       class="pill pill-danger  {% if selected_status == 'cancelled' %}active{% endif %}">✗ Отменено</a>
+  <a href="/admin/bookings?status=cancelled_timeout" class="pill pill-danger {% if selected_status == 'cancelled_timeout' %}active{% endif %}">⌛ Таймаут</a>
+  <a href="/admin/bookings?status=checked_in"     class="pill pill-info   {% if selected_status == 'checked_in' %}active{% endif %}">🏨 Заехал</a>
+  <a href="/admin/bookings?status=checked_out"    class="pill             {% if selected_status == 'checked_out' %}active{% endif %}">🚪 Выехал</a>
+</div>
+
+<div class="filters-bar">
+  <form method="get" action="/admin/bookings" class="filter-form">
+    {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
+    <select name="hotel_id" onchange="this.form.submit()">
+      <option value="">Все отели</option>
+      {% for h in hotels %}
+      <option value="{{ h.id }}" {% if selected_hotel == h.id %}selected{% endif %}>{{ h.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID брони</th>
+        <th>Битрикс</th>
+        <th>Отель / Номер</th>
+        <th>Даты</th>
+        <th>Ночей</th>
+        <th>Сумма</th>
+        <th>Статус</th>
+        <th>Создана</th>
+        <th>Сделка</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for b in bookings %}
+    <tr class="{% if b.status == 'waiting_payment' %}row-pending{% endif %}">
+      <td>
+        <a href="/admin/bookings/{{ b.id }}">
+          <strong>{{ b.id[:8] | upper }}</strong>
+        </a>
+      </td>
+      <td>
+        {% if b.bitrix_contact_id %}
+          <span style="font-size:0.78rem;color:var(--text-dim)">#{{ b.bitrix_contact_id }}</span>
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </td>
+      <td>
+        <code>{{ b.hotel_id }}</code>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:2px">Номер #{{ b.room_id }}</div>
+      </td>
+      <td>
+        <div style="font-size:0.84rem">{{ b.check_in.strftime('%d.%m.%Y') }}</div>
+        <div style="font-size:0.75rem;color:var(--text-dim)">→ {{ b.check_out.strftime('%d.%m.%Y') }}</div>
+      </td>
+      <td style="color:var(--text-dim)">{{ (b.check_out - b.check_in).days }}</td>
+      <td><strong style="color:#fff">{{ "{:,.0f}".format(b.total_amount) }} ₽</strong></td>
+      <td><span class="badge badge-{{ b.status }}">{{ status_labels.get(b.status, b.status) }}</span></td>
+      <td style="font-size:0.78rem;color:var(--text-dim)">{{ b.created_at.strftime('%d.%m %H:%M') }}</td>
+      <td>
+        {% if b.bitrix_deal_id %}
+        <a href="{{ b.bitrix_deal_url }}" target="_blank" class="btn btn-ghost btn-xs">#{{ b.bitrix_deal_id }} ↗</a>
+        {% else %}<span class="text-muted">—</span>{% endif %}
+      </td>
+      <td class="actions">
+        <a href="/admin/bookings/{{ b.id }}" class="btn btn-ghost btn-xs">👁️</a>
+        <form method="post" action="/admin/bookings/{{ b.id }}/delete" style="display:inline"
+              onsubmit="return confirm('Удалить бронь?')">
+          <button class="btn btn-danger btn-xs">🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="10" class="empty">Броней не найдено</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

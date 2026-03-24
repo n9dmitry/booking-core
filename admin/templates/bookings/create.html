@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Создать бронирование{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Создать бронирование</h1>
+  <a href="/admin/bookings" class="btn btn-secondary">← Назад</a>
+</div>
+
+{% if error %}
+<div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<div class="alert" style="background:#f0fff4;border-left:3px solid #38a169;color:#1a5c2a;padding:10px 14px;border-radius:7px;margin-bottom:20px;font-size:0.84rem">
+  🔒 ПД клиента хранятся <strong>только в Битрикс24</strong>. В нашей БД сохраняются лишь ID контакта и ссылка на сделку.
+</div>
+
+<div class="card form-card" style="max-width:720px">
+  <form method="post" action="/admin/bookings/create">
+
+    <div style="font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Проживание</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Отель <span class="req">*</span></label>
+        <select name="hotel_id" required onchange="filterRooms(this.value)">
+          <option value="">— Выберите —</option>
+          {% for h in hotels %}
+          <option value="{{ h.id }}">{{ h.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Номер <span class="req">*</span></label>
+        <select name="room_id" id="room-select" required>
+          <option value="">— Сначала выберите отель —</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Дата заезда <span class="req">*</span></label>
+        <input type="date" name="check_in" required>
+      </div>
+      <div class="form-group">
+        <label>Дата выезда <span class="req">*</span></label>
+        <input type="date" name="check_out" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Взрослых</label>
+        <input type="number" name="adults" value="1" min="1">
+      </div>
+      <div class="form-group">
+        <label>Детей</label>
+        <input type="number" name="children" value="0" min="0">
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);margin:18px 0 14px;font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Данные гостя → Битрикс24</div>
+    <div class="form-group">
+      <label>ФИО <span class="req">*</span></label>
+      <input type="text" name="guest_full_name" placeholder="Иванов Иван Иванович" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Дата рождения</label>
+        <input type="date" name="guest_birth_date">
+      </div>
+      <div class="form-group">
+        <label>Телефон <span class="req">*</span></label>
+        <input type="text" name="guest_phone" placeholder="+7 999 000-00-00" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email <span class="req">*</span></label>
+      <input type="email" name="guest_email" placeholder="guest@example.com" required>
+    </div>
+
+    <div style="border-top:1px solid var(--border);margin:18px 0 14px;font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Паспорт → Битрикс24</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Серия (4 цифры)</label>
+        <input type="text" name="passport_series" placeholder="1234" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>Номер (6 цифр)</label>
+        <input type="text" name="passport_number" placeholder="567890" maxlength="6">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Кем выдан</label>
+      <input type="text" name="passport_issued_by" placeholder="УФМС России...">
+    </div>
+    <div class="form-group">
+      <label>Дата выдачи</label>
+      <input type="date" name="passport_issued_date">
+    </div>
+    <div class="form-group">
+      <label>Комментарий</label>
+      <textarea name="comment" rows="2"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Создать бронь</button>
+      <a href="/admin/bookings" class="btn btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+
+<script src="/admin/static/js/bookings-create.js"></script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Новый отель{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Новый отель</h1>
+  <a href="/admin/hotels" class="btn btn-secondary">← Назад</a>
+</div>
+{% if error %}<div class="alert alert-error">⚠️ {{ error }}</div>{% endif %}
+<div class="card form-card">
+  <form method="post" action="/admin/hotels/create">
+    <div class="form-row">
+      <div class="form-group">
+        <label>ID отеля <span class="req">*</span></label>
+        <input type="text" name="id" placeholder="sochi_1" required>
+        <small>Латиница, цифры, подчёркивание — не менять после создания</small>
+      </div>
+      <div class="form-group">
+        <label>Название <span class="req">*</span></label>
+        <input type="text" name="name" placeholder="Отель Морской Бриз" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Адрес <span class="req">*</span></label>
+      <input type="text" name="address" placeholder="г. Сочи, ул. Морская, 1" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Телефон</label><input type="text" name="phone" placeholder="+7 (862) 000-00-00"></div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="info@hotel.ru"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Время заезда</label><input type="text" name="check_in_time" value="14:00"></div>
+      <div class="form-group"><label>Время выезда</label><input type="text" name="check_out_time" value="12:00"></div>
+    </div>
+    <div class="form-group"><label>Описание</label><textarea name="description" rows="3" placeholder="Краткое описание отеля..."></textarea></div>
+    <div class="form-group"><label>Правила отеля (HTML)</label><textarea name="rules_html" rows="4" placeholder="<p>Заезд после 14:00...</p>"></textarea></div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Создать отель</button>
+      <a href="/admin/hotels" class="btn btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

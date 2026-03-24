@@ -1,0 +1,28 @@
+.two-col-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 0; }
+.token-reveal-box {
+  background: rgba(0,229,160,0.06);
+  border: 1px solid rgba(0,229,160,0.2);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+.token-reveal-title { display:flex; align-items:center; gap:8px; font-weight:600; color:#5fffce; margin-bottom:12px; font-size:0.88rem; }
+.token-value {
+  font-family: 'JetBrains Mono','Fira Code',monospace;
+  font-size: 0.85rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  word-break: break-all;
+  color: #fff;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+  user-select: all;
+}
+.token-mask { font-family: monospace; font-size:0.82rem; color: var(--accent2); }
+.api-endpoints { display:flex; flex-direction:column; gap:6px; }
+.api-row { display:flex; align-items:center; gap:10px; font-size:0.82rem; }
+.method { display:inline-block; padding:2px 7px; border-radius:4px; font-weight:700; font-size:0.66rem; font-family:monospace; }
+.method.get  { background:rgba(0,212,255,0.15); color:var(--accent2); border:1px solid rgba(0,212,255,0.25); }
+.method.post { background:rgba(0,229,160,0.12); color:var(--success); border:1px solid rgba(0,229,160,0.2); }
+.method.del  { background:rgba(255,78,106,0.12); color:var(--danger);  border:1px solid rgba(255,78,106,0.2); }

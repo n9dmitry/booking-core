@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donbass Palace — Отель 5★ в Донецке</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="/static/css/donbass-palace.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <a href="#" class="logo">
+    <span class="logo-main">Donbass Palace</span>
+    <span class="logo-sub">Luxury Hotel ★★★★★</span>
+  </a>
+  <nav>
+    <a href="#rooms">Номера</a>
+    <a href="#about">Об отеле</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+  <a href="#rooms" class="header-btn">Забронировать</a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">★★★★★ &nbsp; Донецк, центр города</div>
+    <h1 class="hero-title">Donbass<br><em>Palace</em></h1>
+    <p class="hero-sub">Исключительный комфорт · Безупречный сервис · Незабываемые впечатления</p>
+
+    <div class="search-box">
+      <div class="search-grid">
+        <div class="search-field">
+          <label>Дата заезда</label>
+          <input type="date" id="s-checkin" required>
+        </div>
+        <div class="search-field">
+          <label>Дата выезда</label>
+          <input type="date" id="s-checkout" required>
+        </div>
+        <div class="search-field">
+          <label>Взрослых</label>
+          <select id="s-adults">
+            <option value="1">1 взрослый</option>
+            <option value="2" selected>2 взрослых</option>
+            <option value="3">3 взрослых</option>
+            <option value="4">4 взрослых</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label>Детей</label>
+          <select id="s-children">
+            <option value="0" selected>Без детей</option>
+            <option value="1">1 ребёнок</option>
+            <option value="2">2 детей</option>
+            <option value="3">3 детей</option>
+          </select>
+        </div>
+        <button class="search-btn" onclick="searchRooms()">Найти номера →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">127<span>+</span></div>
+    <div class="stat-label">Номеров</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">5<span>★</span></div>
+    <div class="stat-label">Категория отеля</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">24<span>/7</span></div>
+    <div class="stat-label">Ресепшн</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">1<span>к</span></div>
+    <div class="stat-label">Счастливых гостей</div>
+  </div>
+</div>
+
+<!-- ROOMS -->
+<section id="rooms">
+  <div class="section-header">
+    <div class="section-tag">Номерной фонд</div>
+    <h2 class="section-title">Выберите <em>идеальный</em> номер</h2>
+    <p class="section-desc">Каждый номер — это особый мир роскоши и уюта. Используйте поиск выше для проверки доступности.</p>
+  </div>
+
+  <div class="rooms-filters" id="rooms-filters" style="display:none">
+    <span class="filter-pill active" data-filter="all" onclick="filterRooms('all',this)">Все номера</span>
+    <span class="filter-pill" data-filter="available" onclick="filterRooms('available',this)">✓ Доступные</span>
+    <span class="filter-pill" data-filter="standard" onclick="filterRooms('standard',this)">Стандарт</span>
+    <span class="filter-pill" data-filter="deluxe" onclick="filterRooms('deluxe',this)">Делюкс</span>
+    <span class="filter-pill" data-filter="suite" onclick="filterRooms('suite',this)">Сюит</span>
+  </div>
+
+  <div class="rooms-grid" id="rooms-grid">
+    <div class="rooms-loading">
+      <div class="spinner-large"></div>
+      Загрузка номеров...
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header">
+    <div class="section-tag">О нас</div>
+    <h2 class="section-title">История <em>легенды</em></h2>
+  </div>
+  <div class="about-grid">
+    <div class="about-img-wrap">
+      <img class="about-img" src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80" alt="Donbass Palace Lobby">
+      <div class="about-img-accent"></div>
+    </div>
+    <div>
+      <div class="about-tag">★ Основан в 1936 году</div>
+      <h3 class="about-title">Гостеприимство<br>на высшем <em>уровне</em></h3>
+      <p class="about-text">Отель Donbass Palace — один из самых известных отелей региона. Расположенный в самом сердце города, он сочетает историческую архитектуру с современным роскошным интерьером.</p>
+      <p class="about-text">Каждая деталь продумана до мелочей — от эксклюзивной мебели до авторской кухни в нашем ресторане с видом на город.</p>
+      <div class="about-features">
+        <div class="about-feature"><div class="about-feature-icon">🍽️</div>Ресторан и лобби-бар премиум-класса</div>
+        <div class="about-feature"><div class="about-feature-icon">💆</div>SPA-центр и фитнес-зал</div>
+        <div class="about-feature"><div class="about-feature-icon">🚗</div>Охраняемая парковка</div>
+        <div class="about-feature"><div class="about-feature-icon">💼</div>Конференц-залы для мероприятий</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contacts">
+  <div>
+    <div class="footer-logo-main">Donbass Palace</div>
+    <div class="footer-logo-sub">Luxury Hotel ★★★★★</div>
+    <p class="footer-desc">Отель в самом центре города. Безупречный сервис, роскошные номера и незабываемые впечатления с 1936 года.</p>
+  </div>
+  <div>
+    <div class="footer-col-title">Навигация</div>
+    <div class="footer-links">
+      <a href="#rooms">Номера</a>
+      <a href="#about">Об отеле</a>
+      <a href="#contacts">Контакты</a>
+    </div>
+  </div>
+  <div>
+    <div class="footer-col-title">Контакты</div>
+    <div class="footer-links">
+      <a href="tel:+38062123456">+380 62 123-45-67</a>
+      <a href="mailto:info@donbasspalace.com">info@donbasspalace.com</a>
+      <a href="#">г. Донецк, ул. Артёма, 80</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 Donbass Palace. Все права защищены.</span>
+    <span>Заезд 14:00 · Выезд 12:00</span>
+  </div>
+</footer>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-modal" onclick="handleModalClick(event)">
+  <div class="modal" id="modal-inner">
+    <div id="modal-form-wrap">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-room-name">Бронирование</div>
+          <div class="modal-subtitle" id="modal-room-sub"></div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="booking-summary" id="booking-summary">
+          <div class="booking-summary-info">
+            <div class="booking-summary-name" id="sum-name">—</div>
+            <div class="booking-summary-dates" id="sum-dates">—</div>
+          </div>
+          <div class="booking-summary-price" id="sum-price">—</div>
+        </div>
+
+        <div class="form-error" id="form-error"></div>
+
+        <div class="form-section-title">Данные гостя</div>
+        <div class="form-group">
+          <label>ФИО полностью <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="Иванов Иван Иванович" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Дата рождения <span class="req">*</span></label>
+            <input type="date" id="f-bdate" required>
+          </div>
+          <div class="form-group">
+            <label>Телефон <span class="req">*</span></label>
+            <input type="tel" id="f-phone" placeholder="+7 999 000-00-00" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="f-email" placeholder="guest@example.com" required>
+        </div>
+
+        <div class="form-section-title" style="margin-top:20px">Паспортные данные</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Серия (4 цифры) <span class="req">*</span></label>
+            <input type="text" id="f-series" placeholder="1234" maxlength="4" required>
+          </div>
+          <div class="form-group">
+            <label>Номер (6 цифр) <span class="req">*</span></label>
+            <input type="text" id="f-pnum" placeholder="567890" maxlength="6" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Кем выдан <span class="req">*</span></label>
+          <input type="text" id="f-issued-by" placeholder="УФМС России по г. Москве" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Дата выдачи <span class="req">*</span></label>
+            <input type="date" id="f-issued-date" required>
+          </div>
+          <div class="form-group">
+            <label>Адрес прописки <span class="req">*</span></label>
+            <input type="text" id="f-reg" placeholder="г. Москва, ул. Примерная, д.1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Комментарий</label>
+          <input type="text" id="f-comment" placeholder="Пожелания к номеру...">
+        </div>
+
+        <div class="privacy-note">
+          🔒 Ваши персональные данные защищены и используются только для оформления бронирования в соответствии с законодательством.
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="submitBooking()">
+          <div class="spinner-sm" id="submit-spinner"></div>
+          <span class="btn-text">Подтвердить бронирование</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="booking-success" id="modal-success" style="display:none">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Бронирование оформлено!</div>
+      <div class="success-info">Ваша бронь успешно создана. Номер зарезервирован:</div>
+      <div class="success-id" id="success-booking-id"></div>
+      <div class="success-info" id="success-details"></div>
+      <div class="success-timer" id="success-timer">
+        ⏱ До подтверждения оплаты: <span class="timer-val" id="timer-countdown">20:00</span>
+      </div>
+      <button class="btn-submit" style="margin-top:20px;max-width:280px;margin-left:auto;margin-right:auto" onclick="closeModal()">
+        <span class="btn-text">Закрыть</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script src="/static/js/donbass-palace.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ hotel.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">{{ hotel.name }}</h1>
+  <a href="/admin/hotels" class="btn btn-secondary">← К отелям</a>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('info', this)">Основная информация</button>
+  <button class="tab" onclick="switchTab('rooms', this)">Номера <span class="tab-count">{{ rooms | length }}</span></button>
+</div>
+
+<div id="tab-info" class="tab-content">
+  <div class="card form-card">
+    <form method="post" action="/admin/hotels/{{ hotel.id }}/edit">
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID</label>
+          <input type="text" value="{{ hotel.id }}" disabled class="input-disabled">
+        </div>
+        <div class="form-group">
+          <label>Название <span class="req">*</span></label>
+          <input type="text" name="name" value="{{ hotel.name }}" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Адрес <span class="req">*</span></label>
+        <input type="text" name="address" value="{{ hotel.address }}" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Телефон</label><input type="text" name="phone" value="{{ hotel.phone or '' }}"></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email_field" value="{{ hotel.email or '' }}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Время заезда</label><input type="text" name="check_in_time" value="{{ hotel.check_in_time }}"></div>
+        <div class="form-group"><label>Время выезда</label><input type="text" name="check_out_time" value="{{ hotel.check_out_time }}"></div>
+      </div>
+      <div class="form-group"><label>Описание</label><textarea name="description" rows="3">{{ hotel.description or '' }}</textarea></div>
+      <div class="form-group"><label>Правила отеля (HTML)</label><textarea name="rules_html" rows="4">{{ hotel.rules_html or '' }}</textarea></div>
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_active" {% if hotel.is_active %}checked{% endif %}>
+          Отель активен
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <form method="post" action="/admin/hotels/{{ hotel.id }}/delete" style="display:inline"
+              onsubmit="return confirm('Удалить отель {{ hotel.name }}? Это нельзя отменить.')">
+          <button class="btn btn-danger">🗑️ Удалить отель</button>
+        </form>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="tab-rooms" class="tab-content" style="display:none">
+  <div class="section-header" style="margin-bottom:16px">
+    <h2>Номера отеля</h2>
+    <a href="/admin/hotels/{{ hotel.id }}/rooms/add" class="btn btn-primary">+ Добавить номер</a>
+  </div>
+  {% if rooms %}
+  <div class="rooms-grid">
+    {% for r in rooms %}
+    <div class="room-card-admin">
+      <div class="room-card-header">
+        <div>
+          <div class="room-number">Номер {{ r.number }}</div>
+          <div class="room-name-admin">{{ r.name }}</div>
+        </div>
+        <span class="badge {% if r.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+          {{ '● Активен' if r.is_active else '○ Откл.' }}
+        </span>
+      </div>
+      <div class="room-card-body">
+        <div class="room-stat"><span>Цена</span>{{ "{:,.0f}".format(r.base_price) }} ₽/ночь</div>
+        <div class="room-stat"><span>Гостей</span>до {{ r.capacity_adults }} взр.</div>
+        {% if r.area_sqm %}<div class="room-stat"><span>Площадь</span>{{ r.area_sqm }} м²</div>{% endif %}
+        {% if r.floor %}<div class="room-stat"><span>Этаж</span>{{ r.floor }}</div>{% endif %}
+      </div>
+      <div class="room-card-footer">
+        <a href="/admin/rooms/{{ r.id }}/edit" class="btn btn-secondary btn-sm">✏️ Изменить</a>
+        <form method="post" action="/admin/rooms/{{ r.id }}/delete" style="display:inline"
+              onsubmit="return confirm('Удалить номер {{ r.number }}?')">
+          <button class="btn btn-danger btn-sm">🗑️</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🛏️</div>
+    <p>Номеров ещё нет</p>
+    <a href="/admin/hotels/{{ hotel.id }}/rooms/add" class="btn btn-primary" style="margin-top:14px">Добавить первый номер</a>
+  </div>
+  {% endif %}
+</div>
+
+<script src="/admin/static/js/hotels-edit.js"></script>
+{% endblock %}

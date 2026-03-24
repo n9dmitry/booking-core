@@ -1,0 +1,214 @@
+{% extends "index.html" %}
+
+{% block title %}Отели — Донбасс Букинг{% endblock %}
+
+{% block content %}
+<div id="app">
+  <h1 class="display-5 fw-bold mb-5">Отели</h1>
+
+  <div class="mb-4">
+    <button @click="openCreateModal" class="btn btn-primary btn-lg shadow">
+      <i class="fas fa-plus me-2"></i> Добавить отель
+    </button>
+  </div>
+
+  <!-- Загрузка -->
+  <div v-if="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+      <span class="visually-hidden">Загрузка...</span>
+    </div>
+    <p class="mt-4 fs-4 text-muted">Загрузка отелей...</p>
+  </div>
+
+  <!-- Нет отелей -->
+  <div v-else-if="hotels.length === 0" class="text-center py-5">
+    <i class="fas fa-hotel fa-5x text-muted mb-4"></i>
+    <h3 class="text-muted">Отелей пока нет</h3>
+    <p class="lead text-muted">Добавьте первый отель</p>
+  </div>
+
+  <!-- Таблица -->
+  <div v-else class="card shadow border-0 rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <table class="table table-hover table-borderless mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-5 py-4">ID</th>
+            <th class="py-4">Название</th>
+            <th class="py-4">Адрес</th>
+            <th class="py-4">Заезд / Выезд</th>
+            <th class="text-end pe-5 py-4">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="hotel in hotels" :key="hotel.id" class="align-middle">
+            <td class="ps-5 fw-bold">{{ hotel.id }}</td>
+            <td class="fw-semibold">{{ hotel.name }}</td>
+            <td class="text-muted">{{ hotel.address || '—' }}</td>
+            <td class="text-muted">{{ hotel.checkin_time }} — {{ hotel.checkout_time }}</td>
+            <td class="text-end pe-5">
+              <button @click="openEditModal(hotel)" class="btn btn-link text-primary p-2">
+                <i class="fas fa-edit fa-lg"></i>
+              </button>
+              <button @click="deleteHotel(hotel.id)" class="btn btn-link text-danger p-2">
+                <i class="fas fa-trash fa-lg"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Модальное окно -->
+  <div class="modal fade" tabindex="-1" :class="{ show: showModal }" :style="{ display: showModal ? 'block' : 'none' }">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content rounded-4 shadow-lg border-0">
+        <div class="modal-header border-0 pb-0">
+          <h2 class="modal-title fs-3 fw-bold">{{ isEdit ? 'Редактировать отель' : 'Новый отель' }}</h2>
+          <button type="button" class="btn-close" @click="closeModal"></button>
+        </div>
+        <div class="modal-body px-5 pb-5">
+          <form @submit.prevent="saveHotel">
+            <div v-if="!isEdit" class="mb-4">
+              <label class="form-label fw-medium">ID (уникальный)</label>
+              <input v-model="form.id" type="text" class="form-control form-control-lg rounded-3" required placeholder="например: hotel-001" />
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-medium">Название</label>
+              <input v-model="form.name" type="text" class="form-control form-control-lg rounded-3" required />
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Домен</label>
+                <input v-model="form.domain" type="text" class="form-control form-control-lg rounded-3" placeholder="example.com" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Адрес</label>
+                <input v-model="form.address" type="text" class="form-control form-control-lg rounded-3" />
+              </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Время заезда</label>
+                <input v-model="form.checkin_time" type="text" class="form-control form-control-lg rounded-3" placeholder="14:00" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Время выезда</label>
+                <input v-model="form.checkout_time" type="text" class="form-control form-control-lg rounded-3" placeholder="12:00" />
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <label class="form-label fw-medium">Описание</label>
+              <textarea v-model="form.description" rows="5" class="form-control form-control-lg rounded-3"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3">
+              <button type="button" class="btn btn-outline-secondary btn-lg px-5" @click="closeModal">Отмена</button>
+              <button type="submit" class="btn btn-primary btn-lg px-5">
+                {{ isEdit ? 'Сохранить изменения' : 'Создать' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Фон модалки -->
+  <div v-if="showModal" class="modal-backdrop fade show"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const { createApp, ref, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const hotels = ref([]);
+    const loading = ref(true);
+    const showModal = ref(false);
+    const isEdit = ref(false);
+    const form = ref({
+      id: '',
+      name: '',
+      domain: '',
+      address: '',
+      description: '',
+      checkin_time: '14:00',
+      checkout_time: '12:00',
+    });
+
+    const loadHotels = async () => {
+      try {
+        const res = await axios.get('/api/v1/hotels');
+        hotels.value = res.data || [];
+      } catch (err) {
+        console.error("Ошибка:", err);
+        alert("Не удалось загрузить отели");
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const openCreateModal = () => {
+      isEdit.value = false;
+      form.value = { id: '', name: '', domain: '', address: '', description: '', checkin_time: '14:00', checkout_time: '12:00' };
+      showModal.value = true;
+    };
+
+    const openEditModal = (hotel) => {
+      isEdit.value = true;
+      form.value = { ...hotel };
+      showModal.value = true;
+    };
+
+    const closeModal = () => showModal.value = false;
+
+    const saveHotel = async () => {
+      try {
+        if (isEdit.value) {
+          await axios.put(`/api/v1/hotels/${form.value.id}`, form.value);
+        } else {
+          await axios.post('/api/v1/hotels', form.value);
+        }
+        closeModal();
+        await loadHotels();
+      } catch (err) {
+        alert(err.response?.data?.detail || 'Ошибка сохранения');
+      }
+    };
+
+    const deleteHotel = async (id) => {
+      if (!confirm(`Удалить отель ${id}?`)) return;
+      try {
+        await axios.delete(`/api/v1/hotels/${id}`);
+        hotels.value = hotels.value.filter(h => h.id !== id);
+      } catch (err) {
+        alert(err.response?.data?.detail || 'Ошибка удаления');
+      }
+    };
+
+    onMounted(loadHotels);
+
+    return {
+      hotels,
+      loading,
+      showModal,
+      isEdit,
+      form,
+      openCreateModal,
+      openEditModal,
+      closeModal,
+      saveHotel,
+      deleteHotel,
+    };
+  }
+}).mount('#app');
+</script>
+{% endblock %}

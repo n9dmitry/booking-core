@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}API Токены{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">API Токены</h1>
+</div>
+
+{% if show_token %}
+<div class="token-reveal-box">
+  <div class="token-reveal-title">
+    <span>🔑</span>
+    <span>Токен «{{ show_token.label }}» — скопируйте, он доступен всегда через кнопку «Показать»</span>
+  </div>
+  <div class="token-value" id="token-display">{{ show_token.token }}</div>
+  <button class="btn btn-secondary btn-sm" onclick="copyToken()">📋 Скопировать</button>
+  <span id="copy-feedback" style="font-size:0.78rem;color:var(--success);margin-left:8px;opacity:0;transition:opacity 0.3s">✓ Скопировано</span>
+</div>
+{% endif %}
+
+<div class="two-col-layout">
+  <!-- Create form -->
+  <div class="card">
+    <div class="card-title">Новый токен</div>
+    <p style="font-size:0.81rem;color:var(--text-dim);margin-bottom:16px">
+      Передайте токен разработчику сайта. Используется в заголовке
+      <code>Authorization: Bearer &lt;token&gt;</code>
+    </p>
+    <form method="post" action="/admin/api-tokens/create">
+      <div class="form-group">
+        <label>Отель <span class="req">*</span></label>
+        <select name="hotel_id" required>
+          <option value="">— Выберите отель —</option>
+          {% for h in hotels %}
+          <option value="{{ h.id }}">{{ h.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Метка</label>
+        <input type="text" name="label" placeholder="Сайт отеля, Мобильное приложение...">
+      </div>
+      <button type="submit" class="btn btn-primary">⚡ Создать токен</button>
+    </form>
+  </div>
+
+  <!-- API docs -->
+  <div class="card">
+    <div class="card-title">📡 Эндпоинты API</div>
+    <div class="api-endpoints">
+      <div class="api-row"><span class="method get">GET</span><code>/ext/hotel</code></div>
+      <div class="api-row"><span class="method get">GET</span><code>/ext/rooms/available?check_in=&check_out=&adults=&children=</code></div>
+      <div class="api-row"><span class="method get">GET</span><code>/ext/rooms/{id}?check_in=&check_out=</code></div>
+      <div class="api-row"><span class="method post">POST</span><code>/ext/booking</code></div>
+      <div class="api-row"><span class="method get">GET</span><code>/ext/booking/{id}</code></div>
+      <div class="api-row"><span class="method del">DEL</span><code>/ext/booking/{id}</code></div>
+    </div>
+    <div style="margin-top:14px">
+      <a href="/docs" target="_blank" class="btn btn-secondary btn-sm">Документация /docs ↗</a>
+    </div>
+  </div>
+</div>
+
+<div class="table-wrap" style="margin-top:20px">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Отель</th><th>Метка</th><th>Токен</th>
+        <th>Статус</th><th>Последнее использование</th><th>Создан</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for t in tokens %}
+    <tr>
+      <td><code>{{ t.hotel_id }}</code></td>
+      <td style="color:var(--text-dim)">{{ t.label or '—' }}</td>
+      <td>
+        <span class="token-mask">{{ t.token[:12] }}••••••••••••</span>
+      </td>
+      <td>
+        {% if t.is_active %}
+          <span class="badge badge-active">● Активен</span>
+        {% else %}
+          <span class="badge badge-inactive">○ Выключен</span>
+        {% endif %}
+      </td>
+      <td style="font-size:0.8rem;color:var(--text-dim)">
+        {{ t.last_used_at.strftime('%d.%m.%Y %H:%M') if t.last_used_at else '—' }}
+      </td>
+      <td style="font-size:0.8rem;color:var(--text-dim)">{{ t.created_at.strftime('%d.%m.%Y') }}</td>
+      <td class="actions">
+        <!-- Показать токен -->
+        <form method="post" action="/admin/api-tokens/{{ t.id }}/show" style="display:inline">
+          <button class="btn btn-ghost btn-xs" title="Показать токен">👁️</button>
+        </form>
+        <!-- Вкл/Выкл -->
+        <form method="post" action="/admin/api-tokens/{{ t.id }}/toggle" style="display:inline">
+          <button class="btn btn-secondary btn-xs" title="{{ 'Отключить' if t.is_active else 'Включить' }}">
+            {{ '⏸' if t.is_active else '▶️' }}
+          </button>
+        </form>
+        <!-- Обновить (перегенерировать) -->
+        <form method="post" action="/admin/api-tokens/{{ t.id }}/regenerate" style="display:inline"
+              onsubmit="return confirm('Перегенерировать токен? Старый токен перестанет работать.')">
+          <button class="btn btn-secondary btn-xs" title="Обновить токен">🔄</button>
+        </form>
+        <!-- Удалить -->
+        <form method="post" action="/admin/api-tokens/{{ t.id }}/delete" style="display:inline"
+              onsubmit="return confirm('Удалить токен? Сайт потеряет доступ к API.')">
+          <button class="btn btn-danger btn-xs" title="Удалить">🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty">Токенов пока нет</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<link rel="stylesheet" href="/admin/static/css/api-tokens.css">
+<script src="/admin/static/js/api-tokens.js"></script>
+{% endblock %}

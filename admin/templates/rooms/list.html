@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Номера{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Номера</h1>
+  <div style="display:flex;gap:10px;align-items:center">
+    <select id="add-room-hotel" style="padding:8px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);font-family:inherit;font-size:0.84rem;color:var(--text)">
+      <option value="">— Выберите отель —</option>
+      {% for h in hotels %}
+      <option value="{{ h.id }}">{{ h.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary" onclick="goAddRoom()">+ Добавить номер</button>
+  </div>
+</div>
+<div class="filters-bar">
+  <form method="get" action="/admin/rooms" class="filter-form">
+    <select name="hotel_id" onchange="this.form.submit()">
+      <option value="">Все отели</option>
+      {% for h in hotels %}
+      <option value="{{ h.id }}" {% if selected_hotel == h.id %}selected{% endif %}>{{ h.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+<script src="/admin/static/js/rooms-list.js"></script>
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>№</th><th>Название</th><th>Отель</th><th>Цена/ночь</th><th>Вместимость</th><th>Статус</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for r in rooms %}
+    <tr>
+      <td><strong style="color:#fff">{{ r.number }}</strong></td>
+      <td>{{ r.name }}</td>
+      <td style="color:var(--text-dim);font-size:0.84rem">{{ r.hotel_id }}</td>
+      <td><strong style="color:#fff">{{ "{:,.0f}".format(r.base_price) }} ₽</strong></td>
+      <td style="color:var(--text-dim)">{{ r.capacity_adults }} взр.</td>
+      <td>
+        {% if r.is_active %}<span class="badge badge-active">● Активен</span>
+        {% else %}<span class="badge badge-inactive">○ Откл.</span>{% endif %}
+      </td>
+      <td class="actions">
+        <a href="/admin/rooms/{{ r.id }}/edit" class="btn btn-secondary btn-xs">✏️ Изменить</a>
+        <form method="post" action="/admin/rooms/{{ r.id }}/delete" style="display:inline"
+              onsubmit="return confirm('Удалить номер {{ r.number }}?')">
+          <button class="btn btn-danger btn-xs">🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty">Номеров пока нет</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
