@@ -117,6 +117,12 @@ app.add_middleware(
 )
 
 app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")),
+    name="static",
+)
+
+app.mount(
     "/admin/static",
     StaticFiles(directory=os.path.join(os.path.dirname(__file__), "admin", "static")),
     name="admin_static",
